@@ -1,5 +1,16 @@
+[![Linux](https://img.shields.io/badge/Linux-Kernel%206.8+-orange.svg)](https://www.kernel.org/)
+[![Build](https://img.shields.io/badge/Build-Success-green.svg)](#)
+[![License](https://img.shields.io/badge/License-GPLv2-blue.svg)](#)
+[![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%7C%20QEMU%20%7C%20x86_64-lightgrey.svg)](#)
+
 # 2025OSproj59
 项目描述
+
+本项目已同步至 GitHub 和 GitLab：
+
+[![GitHub](https://img.shields.io/badge/GitHub-2025OSproj59-181717?logo=github)](https://github.com/vivo50kff/2025OSproj59)
+[![GitLab](https://img.shields.io/badge/GitLab-2025OSproj59-FCA121?logo=gitlab)](https://gitlab.com/vivo50kff/2025OSproj59)
+
 CFS 越来越臃肿, 对终端以及小型系统不太友好
 
 其主要存在的问题:
