@@ -1,3 +1,8 @@
+[![Linux](https://img.shields.io/badge/Linux-Kernel%206.8-orange.svg)](https://www.kernel.org/)
+[![Build](https://img.shields.io/badge/Build-Success-green.svg)](#编译和测试流程)
+[![License](https://img.shields.io/badge/License-GPLv2-blue.svg)](#)
+[![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%7C%20QEMU%20%7C%20x86_64-lightgrey.svg)](#开发环境配置)
+
 # Yat_Casched 缓存感知调度器完整实现文档
 
 ## 目录
