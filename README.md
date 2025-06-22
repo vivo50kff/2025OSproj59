@@ -48,7 +48,7 @@
 
 ###  内核模块 (Kernel Module)
 
-- **完整内核调度器实现**：基于 Linux 6.8+ 内核的缓存感知调度器
+- **内核调度器实现**：基于 Linux 6.8+ 内核的缓存感知调度器
 - **调度策略 ID**：`SCHED_YAT_CASCHED = 8`
 - **核心特性**：
   - 缓存热度时间窗口（10ms）
@@ -71,7 +71,7 @@
 ### 内核模块测试
 
 ```bash
-# 进入内核模块目录
+# 进入内核模块目录，注意这里需要完整内核并且boot_test_scripts放在内核的根目录下才可以启动
 cd code/kernel/boot_test_scripts
 
 # 启动 QEMU 测试环境
