@@ -125,7 +125,7 @@ java LibraryVerification
 - **任务完成时间减少**：减少 10-20%
 - **系统吞吐量提升**：提升 12-18%
 
-详细实验数据请参考：[仿真实验结果](code/simu/result/)
+详细实验数据请参考：[仿真实验结果](code/simu/src/result/)
 
 ## 文档索引
 
@@ -146,7 +146,7 @@ java LibraryVerification
 ### 📊 测试与验证
 
 - **[测试程序](code/kernel/boot_test_scripts/)** - 完整的测试程序集合
-- **[实验结果](code/simu/result/)** - 性能测试数据和图表
+- **[实验结果](code/simu/src/result/)** - 性能测试数据和图表
 - **[可视化工具](code/simu/src/visualizer/)** - 结果可视化组件
 
 ## 技术栈
