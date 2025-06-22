@@ -16,29 +16,8 @@
 - **压力级别**: 中等压力，适合展现调度器亲和性差异
 - **让步策略**: 每15轮迭代让步20微秒，给调度器迁移决策的机会
 
-## 快速开始
 
-### 使用 Makefile（推荐）
 
-```bash
-# 安装Python依赖
-make install-deps
-
-# 检查内核版本
-make check-kernel
-
-# 运行完整测试（编译+测试+可视化）
-make test
-
-# 仅生成可视化图表
-make visualize
-
-# 清理生成文件
-make clean
-
-# 查看帮助
-make help
-```
 
 ### 手动运行
 
@@ -85,7 +64,7 @@ Average Execution Time: CFS: 1.255 s, Yat_Casched: 1.228 s
 ![CPU Switches Comparison](img/cpu_switches_comparison.png)
 
 **分析要点：**
-- Yat_Casched 显著减少了CPU切换次数（减少约29.3%）
+- Yat_Casched 显著减少了CPU切换次数
 - 更少的切换次数表明缓存感知调度策略有效维持了任务的CPU亲和性
 - 这直接体现了Yat_Casched减少缓存失效的设计目标
 
