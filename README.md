@@ -7,12 +7,12 @@
 
 ## 队伍信息
 
-| 字段   | 内容                   |
-| ------ | ---------------------- |
-| 队伍ID | T202510558995172       |
-| 队伍名 | 从容应队               |
-| 项目   | proj59                 |
-| 成员   | 林炜东、马福泉、刘昊   |
+| 字段   | 内容                 |
+| ------ | -------------------- |
+| 队伍ID | T202510558995172     |
+| 队伍名 | 从容应队             |
+| 项目   | proj59               |
+| 成员   | 林炜东、马福泉、刘昊 |
 
 本项目已同步至 GitHub 和 GitLab：
 
@@ -28,7 +28,7 @@
 传统的 Linux CFS 调度器存在以下问题：
 
 - **公平性过度强调**：CFS 体现完全公平，缺乏针对关键线程的优先供给
-- **时延保证不足**：CFS 本身并不严格保证时延，对时延敏感型进程不友好  
+- **时延保证不足**：CFS 本身并不严格保证时延，对时延敏感型进程不友好
 - **负载过重**：在开启组调度后，负载计算及更新引入的开销越来越大
 - **缓存局部性忽视**：频繁的任务迁移导致缓存失效，性能下降
 
@@ -46,7 +46,7 @@
 
 本项目分为两个核心模块：
 
-###  内核模块 (Kernel Module)
+### 内核模块 (Kernel Module)
 
 - **内核调度器实现**：基于 Linux 6.8+ 内核的缓存感知调度器
 - **调度策略 ID**：`SCHED_YAT_CASCHED = 8`
@@ -68,11 +68,11 @@
 
 ## 快速开始
 
-### 内核模块测试
+### 内核模块测试（需要完整内核，仓库地址见kernel文件夹里）
 
 ```bash
-# 进入内核模块测试目录
-cd code/kernel/boot_test_scripts
+# 进入内核模块测试目录，下面路径需要修改，需要放到linux内核根目录下
+cd boot_test_scripts
 
 # 启动 QEMU 测试环境（x86_64）
 ./start_yat_simple_test.sh
@@ -87,8 +87,8 @@ cd code/kernel/boot_test_scripts
 ### 进阶测试（优先级和性能测试）
 
 ```bash
-# 进入高级测试目录
-cd code/kernel/yat_test
+# 进入高级测试目录，同上，该文件夹要放到完整内核根目录下
+cd yat_test
 
 # 启动优先级测试环境
 ./start_priority_test.sh
@@ -164,7 +164,7 @@ java LibraryVerification
 ### 📊 测试与验证
 
 - **[基础测试程序](code/kernel/boot_test_scripts/)** - 基础功能测试
-- **[高级测试程序](code/kernel/yat_test/)** - 优先级和性能测试  
+- **[高级测试程序](code/kernel/yat_test/)** - 优先级和性能测试
 - **[TacleBench测试](code/kernel/tacle-bench/)** - 标准基准测试集
 - **[实验结果](code/simu/src/result/)** - 性能测试数据和图表
 
@@ -187,4 +187,3 @@ java LibraryVerification
 - **依赖**：Jackson, Commons-Math3, JGraphT
 - **构建**：Make/Gradle
 - **可视化**：自研图表库
-
