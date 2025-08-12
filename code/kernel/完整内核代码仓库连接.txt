@@ -1,0 +1,1 @@
+限于篇幅，完整内核仓库在https://github.com/vivo50kff/linux-6.8

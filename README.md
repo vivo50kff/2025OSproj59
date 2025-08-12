@@ -40,7 +40,7 @@
 2. **优先级调度**：支持对指定数量关键进程的优先调度，可抢占非关键进程
 3. **低延迟保证**：达成极低的调度延迟和唤醒延迟
 4. **QoS 支持**：不同进程可指定延迟 QoS，调度器尽力满足需求
-5. **缓存感知**：优化缓存局部性，减少缓存失效带来的性能损失
+5. **缓存感知**：基于Cache Recency Profile理论，优化缓存局部性
 
 ## 项目架构
 
@@ -51,9 +51,9 @@
 - **内核调度器实现**：基于 Linux 6.8+ 内核的缓存感知调度器
 - **调度策略 ID**：`SCHED_YAT_CASCHED = 8`
 - **核心特性**：
-  - 缓存热度时间窗口（10ms）
-  - CPU 亲和性优化
-  - 负载均衡与缓存亲和性权衡
+  - 五策略智能调度算法
+  - 三层缓存历史表建模
+  - CRP缓存重用距离计算
   - 完整的调度类实现
 
 ### 仿真系统 (Simulation System)
@@ -71,14 +71,30 @@
 ### 内核模块测试
 
 ```bash
-# 进入内核模块目录，注意这里需要完整内核并且boot_test_scripts放在内核的根目录下才可以启动
+# 进入内核模块测试目录
 cd code/kernel/boot_test_scripts
 
-# 启动 QEMU 测试环境
-./start_with_template.sh
+# 启动 QEMU 测试环境（x86_64）
+./start_yat_simple_test.sh
+
+# 或者使用ARM64环境
+./start_yat_simple_test_with_arm64.sh
 
 # 在 QEMU 环境中测试调度器
-./test_yat_casched_complete
+./yat_simple_test
+```
+
+### 进阶测试（优先级和性能测试）
+
+```bash
+# 进入高级测试目录
+cd code/kernel/yat_test
+
+# 启动优先级测试环境
+./start_priority_test.sh
+
+# 启用ftrace追踪的测试环境
+./start_yat_simple_test_ftrace.sh
 ```
 
 ### 仿真系统运行
@@ -101,13 +117,13 @@ java LibraryVerification
 
 ### 缓存感知调度
 
-- **智能缓存热度判断**：10ms 精确时间窗口
-- **CPU 亲和性优化**：优先保持任务在上次运行的 CPU
-- **多级缓存建模**：支持 L1/L2/L3 缓存层次结构
+- **五策略智能调度**：基于系统状态的差异化CPU选择算法
+- **三层缓存建模**：精确的L1/L2/L3缓存历史表架构
+- **CRP算法**：Cache Recency Profile理论的缓存收益计算
 
 ### 高性能优化
 
-- **低延迟保证**：调度延迟 < 1ms
+- **微秒级调度延迟**：内存池+红黑树优化
 - **负载均衡**：缓存亲和性与负载平衡的智能权衡
 - **可扩展设计**：模块化架构，易于扩展新算法
 
@@ -121,9 +137,10 @@ java LibraryVerification
 
 根据仿真实验结果，Yat_Casched 调度器相比传统算法具有显著优势：
 
-- **缓存命中率提升**：平均提升 15-25%
-- **任务完成时间减少**：减少 10-20%
-- **系统吞吐量提升**：提升 12-18%
+- **算法胜率**：在100个测试案例中胜率达98.7%
+- **缓存命中率提升**：平均提升 63.3%
+- **任务完成时间减少**：减少 11.9%
+- **系统性能提升**：特定任务集性能改善9.77%
 
 详细实验数据请参考：[仿真实验结果](code/simu/src/result/)
 
@@ -133,7 +150,9 @@ java LibraryVerification
 
 - **[Kernel 模块完整文档](code/kernel/README.md)** - 内核调度器实现详解
 - **[仿真系统使用指南](code/simu/README.md)** - 仿真平台操作手册
-- **[测试脚本说明](code/kernel/boot_test_scripts/README.md)** - QEMU 测试环境配置
+- **[基础测试脚本说明](code/kernel/boot_test_scripts/README.md)** - QEMU 基础测试环境
+- **[高级测试说明](code/kernel/yat_test/)** - 优先级和性能测试
+- **[TacleBench测试](code/kernel/tacle-bench/README.md)** - 标准基准测试
 
 ### 🔧 开发资源
 
@@ -142,12 +161,12 @@ java LibraryVerification
   - [yat_casched.h](code/kernel/yat_casched.h) - 调度器头文件
   - [AlgorithmComparisonExperiment.java](code/simu/src/AlgorithmComparisonExperiment.java) - 算法对比实验
 
-
 ### 📊 测试与验证
 
-- **[测试程序](code/kernel/boot_test_scripts/)** - 完整的测试程序集合
+- **[基础测试程序](code/kernel/boot_test_scripts/)** - 基础功能测试
+- **[高级测试程序](code/kernel/yat_test/)** - 优先级和性能测试  
+- **[TacleBench测试](code/kernel/tacle-bench/)** - 标准基准测试集
 - **[实验结果](code/simu/src/result/)** - 性能测试数据和图表
-- **[可视化工具](code/simu/src/visualizer/)** - 结果可视化组件
 
 ## 技术栈
 
@@ -155,8 +174,12 @@ java LibraryVerification
 
 - **语言**：C
 - **平台**：Linux 6.8+
-- **架构**：x86_64
-- **工具**：GCC, QEMU, Initramfs
+- **架构**：x86_64, ARM64
+- **编译工具**：GCC, Make, Kbuild
+- **虚拟化**：QEMU (x86_64/ARM64)
+- **文件系统**：Initramfs, BusyBox
+- **调试工具**：debugfs, ftrace, perf
+- **性能分析**：TacleBench基准测试集
 
 ### 仿真系统
 

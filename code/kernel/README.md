@@ -855,8 +855,23 @@ gcc -O2 -o verify_real_scheduling verify_real_scheduling.c
 
 ```bash
 ./start_yat_simple_test.sh
-# 或
+# 或使用ARM64环境
 ./start_yat_simple_test_with_arm64.sh
+```
+
+### 高级测试
+
+如需进行优先级测试和性能分析：
+
+```bash
+# 切换到高级测试目录
+cd ../yat_test
+
+# 构建优先级测试
+./build_priority_test.sh
+
+# 启动优先级测试环境
+./start_priority_test.sh
 ```
 
 ---
