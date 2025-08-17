@@ -9,32 +9,33 @@
 
 ### 核心成果
 
-- **完整内核实现**：成功集成到 Linux 6.8 内核调度框架
-- **五策略智能调度**：基于系统状态的差异化CPU选择算法，平衡缓存亲和性与负载均衡
+- **完整内核实现**：成功集成到 Linux 6.8 内核调度框架，1137行核心代码
+- **智能CPU选择算法**：基于系统状态的五策略差异化调度决策，平衡缓存亲和性与负载均衡
 - **三层缓存架构**：L1/L2/L3缓存历史表精确建模，支持微秒级调度决策
-- **性能提升**：特定任务集9.77%的执行时间改善
+- **关键任务优先调度**：通过优先级和key值机制实现关键任务的优先执行
+- **性能提升显著**：相比CFS调度器在特定工作负载下获得显著性能改善
 
 ### 技术特点
 
-- **轻量化设计**：数据结构简洁，调度延迟控制在微秒级
+- **轻量化设计**：每任务额外内存开销最小化，调度延迟控制在微秒级
 - **生产就绪**：完整的debugfs监控接口和ftrace集成，支持实际部署
 - **高度兼容**：完全遵循Linux内核调度框架标准，无侵入式修改
 
 ## 目录
 
-1. [项目概述与设计理念](#1-项目概述与设计理念)
-2. [技术背景与核心算法](#2-技术背景与核心算法)
-3. [决赛阶段技术架构](#3-决赛阶段技术架构)
-4. [内核集成与配置](#4-内核集成与配置)
-5. [调度器核心实现](#5-调度器核心实现)
-6. [用户态测试程序](#6-用户态测试程序)
-7. [编译和测试流程](#7-编译和测试流程)
-8. [实验结果与性能测试](#8-实验结果与性能测试)
-9. [项目总结与展望](#9-项目总结与展望)
+1. [项目概述与设计理念](#项目概述与设计理念)
+2. [技术背景与核心算法](#技术背景与核心算法)
+3. [决赛阶段技术架构](#决赛阶段技术架构)
+4. [内核集成与配置](#内核集成与配置)
+5. [调度器核心实现](#调度器核心实现)
+6. [用户态测试程序](#用户态测试程序)
+7. [编译和测试流程](#编译和测试流程)
+8. [实验结果与性能测试](#实验结果与性能测试)
+9. [项目总结与展望](#项目总结与展望)
 
 ---
 
-## 1. 项目概述与设计理念
+## 项目概述与设计理念
 
 ### 项目背景
 
@@ -70,7 +71,7 @@
 
 ---
 
-## 2. 技术背景与核心算法
+## 技术背景与核心算法
 
 ### 核心问题分析
 
@@ -98,20 +99,20 @@ int select_task_rq_yat_casched(struct task_struct *p, int task_cpu, int flags)
     // 策略2: 上次CPU空闲 → 直接复用（最优缓存利用）
     // 策略3: 唯一空闲CPU → 避免调度冲突
     // 策略4: 多个空闲CPU → 基于缓存收益智能选择  
-    // 策略5: 全忙状态 → CRP缓存重用距离计算
+    // 策略5: 全忙状态 → 负载均衡
 }
 ```
 
 #### 技术创新特点
 
 1. **智能权衡决策**：在缓存亲和性和负载均衡间动态平衡
-2. **微秒级调度开销**：内存池+红黑树优化，调度延迟<2μs
+2. **微秒级调度开销**：内存池+红黑树优化，调度延迟控制在微秒级
 3. **精确缓存建模**：基于CRP理论的三层缓存重用距离计算
-4. **生产级稳定性**：完整集成Linux 6.8内核调度框架
+4. **生产级稳定性**：完整集成Linux 6.8内核调度框架，实现1137行核心代码
 
 ---
 
-## 3. 决赛阶段技术架构
+## 决赛阶段技术架构
 
 ### 整体架构演进
 
@@ -143,7 +144,7 @@ int select_task_rq_yat_casched(struct task_struct *p, int task_cpu, int flags)
 
 ### 核心数据结构设计
 
-#### 1. 任务调度实体（决赛版本）
+#### 1. 任务调度实体
 
 ```c
 struct sched_yat_casched_entity {
@@ -216,8 +217,8 @@ int select_task_rq_yat_casched(struct task_struct *p, int task_cpu, int flags)
         return select_best_idle_cpu_by_benefit(p);
     }
   
-    // 策略5: 全忙状态 - CRP缓存收益计算
-    return select_cpu_by_cache_recency_profile(p);
+    // 策略5: 全忙状态 - 负载均衡计算
+    return select_least_loaded_cpu();
 }
 ```
 
@@ -268,7 +269,7 @@ cat /sys/kernel/debug/tracing/trace | grep yat_casched
 
 ---
 
-## 4. 内核集成与配置
+## 内核集成与配置
 
 ### 系统要求
 
@@ -312,13 +313,9 @@ make mrproper
 make clean
 ```
 
----
-
-## 4. 内核集成与配置
+### 内核配置系统集成
 
 在实现调度器的核心逻辑之前，我们需要将新的调度类正确集成到Linux内核的调度框架中。这个过程包括配置系统集成、编译系统修改和核心调度器注册等步骤。
-
-### 第一步：内核配置系统集成
 
 #### 1. 添加Kconfig配置项
 
@@ -354,7 +351,7 @@ obj-$(CONFIG_SCHED_CLASS_YAT_CASCHED) += yat_casched.o
 
 **编译逻辑**：只有在配置了相应选项时才编译调度器代码，保持内核的模块化特性。
 
-### 第二步：内核编译配置
+### 内核编译配置
 
 #### 1. 配置内核选项
 
@@ -406,7 +403,7 @@ grep CONFIG_SCHED_DEBUG .config
 grep CONFIG_SCHEDSTATS .config
 ```
 
-### 第三步：解决编译依赖问题
+### 解决编译依赖问题
 
 #### 1. 调试工具和模块签名一步到位配置
 
@@ -427,7 +424,7 @@ sudo apt install dwarves
 # 2. 预防性禁用可能出问题的选项
 scripts/config --disable CONFIG_DEBUG_INFO_BTF
 
-# 3. 一步到位解决模块签名问题
+# 3. 解决模块签名问题
 echo "正在配置模块签名设置..."
 sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/' .config
 sed -i 's/CONFIG_MODULE_SIG_ALL=y/CONFIG_MODULE_SIG_ALL=n/' .config
@@ -466,7 +463,7 @@ which gcc make
 gcc --version
 ```
 
-### 第四步：内核编译过程
+### 内核编译过程
 
 #### 1. 执行编译
 
@@ -519,45 +516,18 @@ objdump -t kernel/sched/yat_casched.o | grep -E "(pick_next|enqueue|dequeue)"
 grep -A5 -B5 yat_casched System.map
 ```
 
-#### 4. 编译问题排查
-
-**常见编译错误及解决方案**：
-
-1. **链接错误**：
-
-```bash
-# 问题：undefined reference to `yat_casched_class`
-# 解决：检查sched.h中的声明和yat_casched.c中的定义
-grep -n "yat_casched_class" kernel/sched/sched.h kernel/sched/yat_casched.c
-```
-
-2. **头文件循环依赖**：
-
-```bash
-# 问题：implicit declaration of function
-# 解决：检查头文件包含顺序
-head -20 kernel/sched/yat_casched.c
-```
-
-3. **配置选项问题**：
-
-```bash
-# 问题：某些函数被条件编译排除
-# 解决：确认所有相关的CONFIG选项
-grep -r "CONFIG_SCHED_CLASS_YAT_CASCHED" include/ kernel/
-```
-
 ---
 
-## 5. 调度器核心实现
+## 调度器核心实现
 
 ### 关键内核文件及修改位置
 
 本调度器的实现涉及以下关键文件的修改和新增：
 
-- **`yat_casched.h`**：调度实体结构体定义，包含红黑树节点、WCET、缓存重用距离等
-- **`yat_casched.c`**：调度器核心算法实现，包含565行完整的调度逻辑
+- **`kernel/sched/yat_casched.c`**：调度器核心算法实现，包含1137行完整的调度逻辑
+- **`include/linux/sched/yat_casched.h`**：调度实体结构体定义，包含红黑树节点、WCET、缓存重用距离等
 - **`include/uapi/linux/sched.h`**：调度策略ID定义 `SCHED_YAT_CASCHED = 8`
+- **`kernel/sched/sched.h`**：调度类声明与运行队列结构扩展
 - **`kernel/sched/core.c`**：调度策略注册与调度器初始化集成
 - **`init/init_task.c`**：init_task结构体初始化
 - **`kernel/sched/Makefile`**：编译系统集成
@@ -573,6 +543,7 @@ grep -r "CONFIG_SCHED_CLASS_YAT_CASCHED" include/ kernel/
 #### 2. 五策略智能调度算法
 
 基于系统状态进行差异化CPU选择：
+
 - 策略1：首次运行任务 → 负载均衡
 - 策略2：上次CPU空闲 → 直接复用
 - 策略3：唯一空闲CPU → 避免冲突
@@ -594,29 +565,33 @@ grep -r "CONFIG_SCHED_CLASS_YAT_CASCHED" include/ kernel/
 ### 工程特色
 
 - **生产级稳定性**：完整集成Linux 6.8内核调度框架
-- **微秒级调度延迟**：内存池+红黑树优化带来的高性能
+- **高效性能优化**：内存池+红黑树优化带来的高性能调度
 - **可扩展架构**：模块化设计，便于扩展新的调度策略---
 
-## 6. 用户态测试程序
+## 用户态测试程序
 
 所有测试程序源码和可执行文件均位于 `boot_test_scripts/` 目录下。
 
-- `test_yat_casched_complete.c`：完整功能测试，自动验证调度器各项能力。
-- `test_cache_aware_fixed.c`：缓存感知专项测试。
-- `verify_real_scheduling.c`：调度器真实性验证。
+- `yat_simple_test.c`：基础功能测试，验证调度器基本运行能力
+- `test_yat_casched_complete.c`：完整功能测试，自动验证调度器各项能力
+- `test_cache_aware_fixed.c`：缓存感知专项测试
+- `verify_real_scheduling.c`：调度器真实性验证
+- `CFS_test.c`：CFS调度器对照测试程序
 
 编译命令示例：
 
 ```bash
 cd boot_test_scripts
+gcc -O2 -o yat_simple_test yat_simple_test.c
 gcc -O2 -o test_yat_casched_complete test_yat_casched_complete.c
 gcc -O2 -o test_cache_aware_fixed test_cache_aware_fixed.c
 gcc -O2 -o verify_real_scheduling verify_real_scheduling.c
+gcc -O2 -o CFS_test CFS_test.c
 ```
 
 ---
 
-## 7. 编译和测试流程
+## 编译和测试流程
 
 1. 编译内核（bzImage）：
 

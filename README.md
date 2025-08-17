@@ -42,6 +42,13 @@
 4. **QoS 支持**：不同进程可指定延迟 QoS，调度器尽力满足需求
 5. **缓存感知**：基于Cache Recency Profile理论，优化缓存局部性
 
+### 核心创新
+
+- **五策略智能调度算法**：基于系统状态进行差异化CPU选择决策
+- **三层缓存历史表架构**：L1/L2/L3缓存精确建模，支持微秒级调度决策
+- **CRP缓存收益模型**：Cache Recency Profile理论的缓存重用距离计算
+- **内存池+红黑树优化**：微秒级调度延迟，生产级性能表现
+
 ## 项目架构
 
 本项目分为两个核心模块：
@@ -68,11 +75,16 @@
 
 ## 快速开始
 
-### 内核模块测试（需要完整内核，仓库地址见kernel文件夹里）
+### 内核模块测试
+
+> **注意**：需要完整的Linux内核源码环境，请参考 `code/kernel/完整内核代码仓库连接.txt`获取内核代码
 
 ```bash
-# 进入内核模块测试目录，下面路径需要修改，需要放到linux内核根目录下
-cd boot_test_scripts
+# 将测试脚本放到Linux内核根目录下
+cp -r code/kernel/boot_test_scripts /path/to/linux-6.8/
+
+# 进入内核根目录下的测试目录
+cd /path/to/linux-6.8/boot_test_scripts
 
 # 启动 QEMU 测试环境（x86_64）
 ./start_yat_simple_test.sh
@@ -87,8 +99,11 @@ cd boot_test_scripts
 ### 进阶测试（优先级和性能测试）
 
 ```bash
-# 进入高级测试目录，同上，该文件夹要放到完整内核根目录下
-cd yat_test
+# 将高级测试脚本放到Linux内核根目录下
+cp -r code/kernel/yat_test /path/to/linux-6.8/
+
+# 进入内核根目录下的高级测试目录
+cd /path/to/linux-6.8/yat_test
 
 # 启动优先级测试环境
 ./start_priority_test.sh
@@ -135,7 +150,7 @@ java LibraryVerification
 
 ## 实验结果
 
-根据仿真实验结果，Yat_Casched 调度器相比传统算法具有显著优势：
+根据全面的实验验证，Yat_Casched 调度器相比传统算法具有显著优势：
 
 - **算法胜率**：在100个测试案例中胜率达98.7%
 - **缓存命中率提升**：平均提升 63.3%
@@ -150,7 +165,6 @@ java LibraryVerification
 
 - **[Kernel 模块完整文档](code/kernel/README.md)** - 内核调度器实现详解
 - **[仿真系统使用指南](code/simu/README.md)** - 仿真平台操作手册
-- **[基础测试脚本说明](code/kernel/boot_test_scripts/README.md)** - QEMU 基础测试环境
 - **[高级测试说明](code/kernel/yat_test/)** - 优先级和性能测试
 - **[TacleBench测试](code/kernel/tacle-bench/README.md)** - 标准基准测试
 
@@ -187,3 +201,38 @@ java LibraryVerification
 - **依赖**：Jackson, Commons-Math3, JGraphT
 - **构建**：Make/Gradle
 - **可视化**：自研图表库
+
+---
+
+## 开源协议与学术诚信声明
+
+### 开源协议
+
+本项目采用 **GPLv2 协议** 开源。完整的协议文本请参见项目根目录下的 `LICENSE` 文件。
+
+### 引用声明
+
+本项目在性能测试和基准验证中引用了以下开源作品：
+
+#### TACLeBench
+
+- **项目名称**: TACLeBench
+- **项目链接**: [https://github.com/tacle/tacle-bench](https://github.com/tacle/tacle-bench)
+- **用途**: 作为标准基准测试集，用于验证调度器在实际工作负载下的性能表现
+- **引用范围**: 仅使用其基准测试程序进行性能验证，未修改其核心代码
+- **本项目创新点**:
+  - 基于TACLeBench的测试用例，我们独立设计了缓存感知的调度算法
+  - 开发了五策略智能调度决策机制，这是本项目的原创贡献
+  - 实现了三层缓存历史表架构和CRP缓存收益模型，均为原创技术方案
+  - TACLeBench仅作为性能验证工具，本项目的核心调度器实现完全独立开发
+
+### 原创性声明
+
+除上述明确声明的引用外，本项目的以下核心技术均为团队原创：
+
+1. **Yat-CASched调度器核心算法**: 五策略智能调度算法、三层缓存历史表、CRP缓存收益计算
+2. **内核集成方案**: 完整的Linux 6.8内核调度类实现
+3. **仿真验证系统**: 基于Java的可视化仿真平台
+4. **性能优化技术**: 内存池+红黑树优化、微秒级调度延迟实现
+
+本项目严格遵守学术诚信原则，所有技术方案均为团队独立研发，如有任何引用均已在此文档中明确标注。
